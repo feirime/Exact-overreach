@@ -40,7 +40,9 @@ int get_SP_cores(cudaDeviceProp devProp)
 __global__ void initializer(unsigned long long *G, int E_max, int M_max, int n)
 {
     auto x = blockIdx.x * blockDim.x + threadIdx.x;
-    for(auto i = x; i < (E_max * M_max); i += blockDim.x * gridDim.x)
+    int E_num = 2 * E_max + 1;
+    int M_num = 2 * M_max + 1;
+    for(auto i = x; i < E_num * M_num; i += blockDim.x * gridDim.x)
     {
         G[i] = 0;
     }
@@ -48,9 +50,14 @@ __global__ void initializer(unsigned long long *G, int E_max, int M_max, int n)
 
 __global__ void calculate_dos(short *J, short *S, unsigned long long *G, int E_max, int M_max, int n, bool bc)
 {
+    //int x = blockIdx.x * blockDim.x + threadIdx.x;
+    //int y = blockIdx.y * blockDim.y + threadIdx.y;
+    int E_num = 2 * E_max + 1;
+    int M_num = 2 * M_max + 1;
     if(!bc)
     {
-        for(unsigned long long conf = 0; conf < 1 << (n * n); ++conf)
+        //for(unsigned long long conf = x; conf < 1 << (n * n); conf += blockDim.x * gridDim.x)
+        for(unsigned long long int conf = 0; conf < 1 << (n * n); conf++)
         {
             int E = 0;
             int M = 0;
@@ -65,15 +72,16 @@ __global__ void calculate_dos(short *J, short *S, unsigned long long *G, int E_m
                 int k = 1;
                 for(auto j = 0; j < n; ++j)
                 {
-                    E += - S[n * i + j] * S[n * i + (j + 1) % n];
-                    E += - S[n * i + j] * S[(n * i + j + n) % (n * n)];
+                    E += -S[n * i + j] * S[n * i + (j + 1) % n];
+                    E += -S[n * i + j] * S[(n * i + n) % (n * n) + j];
                     M += S[n * i + j];
                     k += n * n + 1;
                 }
             }
-            E = E + E_max;
-            M = M + M_max;
-            atomicAdd(&G[E * M_max + M], 1);
+            E += E_max;
+            M += M_max;
+            //atomicAdd(&G[E * M_max + M], 1);
+            G[E * M_num + M]++;
         }
     }
 }
