@@ -52,12 +52,13 @@ __global__ void calculate_dos(short *J, short *S, unsigned long long *G, int E_m
 {
     //int x = blockIdx.x * blockDim.x + threadIdx.x;
     //int y = blockIdx.y * blockDim.y + threadIdx.y;
+    unsigned long long ONE = 1;
     int E_num = 2 * E_max + 1;
     int M_num = 2 * M_max + 1;
     if(!bc)
     {
         //for(unsigned long long conf = x; conf < 1 << (n * n); conf += blockDim.x * gridDim.x)
-        for(unsigned long long int conf = 0; conf < 1 << (n * n); conf++)
+        for(unsigned long long int conf = 0; conf < ONE << (n * n); conf++)
         {
             int E = 0;
             int M = 0;

@@ -3,13 +3,13 @@
 #include "cpu.h"
 #include "gpu.h"
 
-int n = 6;
-unsigned long long length = 1 << n;
+int n = 5;
+unsigned long long ONE = 1;
+unsigned long long length = ONE << n;
 bool periodical_bc = false;
 
 int main()
 {
-    std::cout << sizeof(unsigned long long int) << '\n';
     auto t1 = std::chrono::high_resolution_clock::now();
     short *J, *S;
     unsigned long long *G;

@@ -26,8 +26,8 @@ void out(unsigned long long *G, int E_max, int M_max)
     std::ofstream gem_out("data/dos" + std::to_string(n * n) + "_J" + std::to_string(J_sum) + "_0.dat");
     gem_out << n << "\n";
     int size = 0;
-    for (auto E = 0; E < 2 * E_max + 1; ++E)
-        for (auto M = 0; M < 2 * M_max + 1; ++M)
+    for (auto E = 0; E < E_num; ++E)
+        for (auto M = 0; M < M_num; ++M)
             if (G[E * M_max + M] > 0)
             {
                 size++;
@@ -48,7 +48,7 @@ void out(unsigned long long *G, int E_max, int M_max)
         }
     }
     gem_out.close();
-    unsigned long long G_sum_t = 1 << (n * n);
+    unsigned long long G_sum_t = ONE << (n * n);
     std::cout << "Gsum = " << G_sum << '\n'
               << "Gsum must be = " << G_sum_t << '\n';
 }
