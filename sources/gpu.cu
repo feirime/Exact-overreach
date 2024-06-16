@@ -48,24 +48,23 @@ __global__ void initializer(unsigned long long *G, int E_max, int M_max, int n)
     }
 }
 
-__global__ void calculate_dos(short *J, short *S, unsigned long long *G, int E_max, int M_max, int n, bool bc)
+__global__ void calculate_dos(short *J, short *S, unsigned long long *G, int E_max, int M_max, int n, bool bc, int grid_size)
 {
-    //int x = blockIdx.x * blockDim.x + threadIdx.x;
-    //int y = blockIdx.y * blockDim.y + threadIdx.y;
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
     unsigned long long ONE = 1;
     int E_num = 2 * E_max + 1;
     int M_num = 2 * M_max + 1;
     if(!bc)
     {
-        //for(unsigned long long conf = x; conf < 1 << (n * n); conf += blockDim.x * gridDim.x)
-        for(unsigned long long int conf = 0; conf < ONE << (n * n); conf++)
+        for(unsigned long long conf = x; conf < ONE << (n * n); conf += blockDim.x * gridDim.x)
+        //for(unsigned long long int conf = 0; conf < ONE << (n * n); conf++)
         {
             int E = 0;
             int M = 0;
             int bit = conf;
             for(auto i = 0; i < (n * n); ++i)
             {
-                S[i] = bit & 1 ? 1 : -1;
+                S[x * n * n + i] = bit & 1 ? 1 : -1;
                 bit >>= 1; 
             }
             for(auto i = 0; i < n; ++i)
@@ -73,16 +72,15 @@ __global__ void calculate_dos(short *J, short *S, unsigned long long *G, int E_m
                 int k = 1;
                 for(auto j = 0; j < n; ++j)
                 {
-                    E += -S[n * i + j] * S[n * i + (j + 1) % n];
-                    E += -S[n * i + j] * S[(n * i + n) % (n * n) + j];
-                    M += S[n * i + j];
+                    E += -S[x * n * n + n * i + j] * S[x * n * n + n * i + (j + 1) % n];
+                    E += -S[x * n * n + n * i + j] * S[x * n * n + (n * i + n) % (n * n) + j];
+                    M += S[x * n * n + n * i + j];
                     k += n * n + 1;
                 }
             }
             E += E_max;
             M += M_max;
-            //atomicAdd(&G[E * M_max + M], 1);
-            G[E * M_num + M]++;
+            atomicAdd(&G[E * M_num + M], 1);
         }
     }
 }

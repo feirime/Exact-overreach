@@ -26,10 +26,12 @@ int main()
     cudaGetDeviceProperties(&dev, 0);
     static size_t block_dim = 512;
     static size_t grid_dim = get_SP_cores(dev);
+    int grid_size = block_dim * grid_dim;
     std::cout << "sp_cores: " << get_SP_cores(dev) << "\n";
+    cudaMallocManaged(&S, grid_size * n * n * sizeof(short));
     initializer<<<grid_dim, block_dim>>>(G, E_max, M_max, n);
-    //calculate_dos<<<grid_dim, block_dim>>>(J, S, G, E_num, M_max, n, periodical_bc);
-    calculate_dos<<<1, 1>>>(J, S, G, E_max, M_max, n, periodical_bc);
+    calculate_dos<<<grid_dim, block_dim>>>(J, S, G, E_max, M_max, n, periodical_bc, grid_size);
+    //calculate_dos<<<1, 1>>>(J, S, G, E_max, M_max, n, periodical_bc);
     cudaDeviceSynchronize();
     out(G, E_max, M_max);
     cudaFree(J);
